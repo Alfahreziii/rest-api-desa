@@ -84,24 +84,31 @@ const verifyEmail = async (req, res) => {
   const { token } = req.query;
 
   try {
-    const user = await UserModel.query().findOne({ remember_token: token });
+    const user = await UserModel.query().findOne({ email_verification_token: token });
 
     if (!user) {
       return res.status(400).send({ message: "Token verifikasi tidak valid." });
     }
 
-    await UserModel.query()
-      .patch({
-        email_verified_at: new Date().toISOString().slice(0, 19).replace('T', ' '),
-        remember_token: null, // hapus token setelah verifikasi
-      })
-      .where({ id: user.id });
+    const updatePayload = {
+      email_verified_at: new Date().toISOString().slice(0, 19).replace('T', ' '),
+      email_verification_token: null,
+    };
+
+    // Jika user sedang mengubah email, pindahkan unverified_email ke email
+    if (user.unverified_email) {
+      updatePayload.email = user.unverified_email;
+      updatePayload.unverified_email = null;
+    }
+
+    await UserModel.query().patch(updatePayload).where({ id: user.id });
 
     return res.send({ message: "Email berhasil diverifikasi." });
   } catch (err) {
     return res.status(500).send({ message: "Verifikasi gagal", error: err.message });
   }
 };
+
 
 
 /**
