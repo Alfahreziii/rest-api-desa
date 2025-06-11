@@ -1,6 +1,6 @@
 const baseCors = require("cors");
 
-const whitelistOrigins = ["http://localhost:5175"];
+const whitelistOrigins = ["http://localhost:5173"];
 const cors = baseCors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like direct link from browser/email)
