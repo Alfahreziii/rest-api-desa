@@ -2,9 +2,10 @@ const Aduan = require("../models/aduan");
 const upload = require('../utils/upload');
 const path = require('path');
 const fs = require('fs');
+const { UPLOAD_DIR } = require('../utils/config');
 
 /**
- * GET /Berita
+ * GET /aduan
  */
 const index = async (req, res) => {
   try {
@@ -16,7 +17,7 @@ const index = async (req, res) => {
     });
   } catch (err) {
     return res.status(500).send({
-      message: "Error retrieving Berita",
+      message: "Error retrieving aduan",
       error: err.message,
     });
   }
@@ -45,14 +46,30 @@ const store = async (req, res, next) => {
     });
 
   } catch (err) {
-    next(err);
+        // Hapus file jika ada error dan file sudah di-upload
+    if (req.file && req.file.filename) {
+      const uploadedPath = path.join(UPLOAD_DIR, req.file.filename);
+      if (fs.existsSync(uploadedPath)) {
+        fs.unlinkSync(uploadedPath);
+      }
+    }
+
+    // Tangani error unik
+    if (err.nativeError && err.nativeError.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ message: "Deskripsi sudah digunakan (duplikat)" });
+    }
+
+    return res.status(500).json({
+      message: "Error saat menambahkan aduan",
+      error: err.message,
+    });
   }
 };
 
 
 
 /**
- * PUT /Berita/:id
+ * PUT /aduan/:id
  */
 const update = async (req, res) => {
   const { id } = req.params;
@@ -60,12 +77,12 @@ const update = async (req, res) => {
   const allowedFields = ["judul", "keterangan"];
 
   try {
-    // Cari data berita lama
+    // Cari data aduan lama
     const aduan = await Aduan.query().findById(id);
     if (!aduan) {
     // Hapus gambar yang kadung diupload
     if (req.file) {
-        const uploadedPath = path.join(__dirname, '../../uploads', req.file.filename);
+        const uploadedPath = path.join(UPLOAD_DIR, req.file.filename);
         if (fs.existsSync(uploadedPath)) {
         fs.unlinkSync(uploadedPath);
         }
@@ -94,7 +111,7 @@ const update = async (req, res) => {
 
       // Hapus file lama jika ada
       if (aduan.foto) {
-        const oldPath = path.join(__dirname, '../../uploads', aduan.foto);
+        const oldPath = path.join(UPLOAD_DIR, aduan.foto);
         if (fs.existsSync(oldPath)) {
           fs.unlinkSync(oldPath);
         }
@@ -106,11 +123,23 @@ const update = async (req, res) => {
     // Lakukan update
     await Aduan.query().findById(id).patch(updateData);
 
-    return res.json({ message: "Berita updated successfully" });
+    return res.json({ message: "aduan updated successfully" });
 
   } catch (err) {
+        // Hapus file jika ada error dan file sudah di-upload
+    if (req.file && req.file.filename) {
+      const uploadedPath = path.join(UPLOAD_DIR, req.file.filename);
+      if (fs.existsSync(uploadedPath)) {
+        fs.unlinkSync(uploadedPath);
+      }
+    }
+
+    // Tangani error unik
+    if (err.nativeError && err.nativeError.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ message: "Deskripsi sudah digunakan (duplikat)" });
+    }
     return res.status(500).json({
-      message: "Error updating Berita",
+      message: "Error updating aduan",
       error: err.message,
     });
   }
@@ -119,7 +148,7 @@ const update = async (req, res) => {
 
 
 /**
- * DELETE /Berita/:id
+ * DELETE /aduan/:id
  */
 const destroy = async (req, res) => {
   const { id } = req.params;
@@ -133,7 +162,7 @@ const destroy = async (req, res) => {
 
     // Hapus file gambar jika ada
     if (aduan.foto) {
-      const filePath = path.join(__dirname, '../../uploads', aduan.foto);
+      const filePath = path.join(UPLOAD_DIR, aduan.foto);
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath); // Hapus file
       }
@@ -142,10 +171,10 @@ const destroy = async (req, res) => {
     // Hapus data dari database
     await Aduan.query().deleteById(id);
 
-    return res.json({ message: "Berita deleted successfully" });
+    return res.json({ message: "aduan deleted successfully" });
   } catch (err) {
     return res.status(500).json({
-      message: "Error deleting Berita",
+      message: "Error deleting aduan",
       error: err.message,
     });
   }

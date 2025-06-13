@@ -2,13 +2,14 @@ const Berita = require("../models/berita");
 const upload = require('../utils/upload');
 const path = require('path');
 const fs = require('fs');
+const { UPLOAD_DIR } = require('../utils/config');
 
 /**
  * GET /Berita
  */
 const index = async (req, res) => {
   try {
-    const Beritas = await Berita.query(); // ambil semua kolom dan semua data
+    const Beritas = await Berita.query();
 
     return res.send({
       message: "Success",
@@ -22,11 +23,13 @@ const index = async (req, res) => {
   }
 };
 
+/**
+ * POST /Berita
+ */
 const store = async (req, res, next) => {
   try {
     const { judul, deskripsi } = req.body;
 
-    // Validasi
     if (!judul || !deskripsi || !req.file) {
       return res.status(400).json({ message: 'Judul, deskripsi, dan foto wajib diisi' });
     }
@@ -34,7 +37,7 @@ const store = async (req, res, next) => {
     const newBerita = {
       judul,
       deskripsi,
-      foto: req.file.filename  // atau simpan path lengkap: `uploads/${req.file.filename}`
+      foto: req.file.filename
     };
 
     const createdBerita = await Berita.query().insert(newBerita);
@@ -45,10 +48,25 @@ const store = async (req, res, next) => {
     });
 
   } catch (err) {
-    next(err);
+    // Hapus file jika ada error dan file sudah di-upload
+    if (req.file && req.file.filename) {
+      const uploadedPath = path.join(UPLOAD_DIR, req.file.filename);
+      if (fs.existsSync(uploadedPath)) {
+        fs.unlinkSync(uploadedPath);
+      }
+    }
+
+    // Tangani error unik
+    if (err.nativeError && err.nativeError.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ message: "Deskripsi sudah digunakan (duplikat)" });
+    }
+
+    return res.status(500).json({
+      message: "Error saat menambahkan berita",
+      error: err.message,
+    });
   }
 };
-
 
 
 /**
@@ -56,34 +74,29 @@ const store = async (req, res, next) => {
  */
 const update = async (req, res) => {
   const { id } = req.params;
-
   const allowedFields = ["judul", "deskripsi"];
 
   try {
-    // Cari data berita lama
     const berita = await Berita.query().findById(id);
     if (!berita) {
-    // Hapus gambar yang kadung diupload
-    if (req.file) {
-        const uploadedPath = path.join(__dirname, '../../uploads', req.file.filename);
+      if (req.file) {
+        const uploadedPath = path.join(UPLOAD_DIR, req.file.filename);
         if (fs.existsSync(uploadedPath)) {
-        fs.unlinkSync(uploadedPath);
+          fs.unlinkSync(uploadedPath);
         }
-    }
+      }
 
-    return res.status(404).json({ message: "Berita not found" });
-}
+      return res.status(404).json({ message: "Berita not found" });
+    }
 
     const updateData = {};
 
-    // Ambil field dari req.body
     allowedFields.forEach(field => {
       if (req.body[field] !== undefined) {
         updateData[field] = req.body[field];
       }
     });
 
-    // Jika ada file foto baru diupload
     if (req.file) {
       const allowedTypes = ['.png', '.jpg', '.jpeg', '.gif'];
       const ext = path.extname(req.file.originalname).toLowerCase();
@@ -92,9 +105,8 @@ const update = async (req, res) => {
         return res.status(400).json({ message: "File harus berupa gambar (png/jpg/jpeg/gif)" });
       }
 
-      // Hapus file lama jika ada
       if (berita.foto) {
-        const oldPath = path.join(__dirname, '../../uploads', berita.foto);
+        const oldPath = path.join(UPLOAD_DIR, berita.foto);
         if (fs.existsSync(oldPath)) {
           fs.unlinkSync(oldPath);
         }
@@ -103,20 +115,28 @@ const update = async (req, res) => {
       updateData.foto = req.file.filename;
     }
 
-    // Lakukan update
     await Berita.query().findById(id).patch(updateData);
 
     return res.json({ message: "Berita updated successfully" });
 
   } catch (err) {
+    if (req.file && req.file.filename) {
+      const uploadedPath = path.join(UPLOAD_DIR, req.file.filename);
+      if (fs.existsSync(uploadedPath)) {
+        fs.unlinkSync(uploadedPath);
+      }
+    }
+
+    // Tangani error unik
+    if (err.nativeError && err.nativeError.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ message: "Deskripsi sudah digunakan (duplikat)" });
+    }
     return res.status(500).json({
       message: "Error updating Berita",
       error: err.message,
     });
   }
 };
-
-
 
 /**
  * DELETE /Berita/:id
@@ -125,21 +145,18 @@ const destroy = async (req, res) => {
   const { id } = req.params;
 
   try {
-    // Cari data berita dulu
     const berita = await Berita.query().findById(id);
     if (!berita) {
       return res.status(404).json({ message: "Berita not found" });
     }
 
-    // Hapus file gambar jika ada
     if (berita.foto) {
-      const filePath = path.join(__dirname, '../../uploads', berita.foto);
+      const filePath = path.join(UPLOAD_DIR, berita.foto);
       if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath); // Hapus file
+        fs.unlinkSync(filePath);
       }
     }
 
-    // Hapus data dari database
     await Berita.query().deleteById(id);
 
     return res.json({ message: "Berita deleted successfully" });
