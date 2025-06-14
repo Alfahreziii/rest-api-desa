@@ -6,7 +6,7 @@ exports.up = async function (knex) {
   await knex.schema.createTable("laporans", (table) => {
     table.increments("id").primary();
     table.integer("jumlah_rumah").notNullable();
-    table.integer("jumlah_kk").unique().notNullable();
+    table.integer("jumlah_kk").notNullable();
     table.integer("jumlah_laki").notNullable();
     table.integer("jumlah_perempuan").notNullable();
     table.integer("jumlah_meninggal").notNullable();

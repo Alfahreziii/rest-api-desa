@@ -1,8 +1,8 @@
 const { Model } = require("objection");
 
-class Aduan extends Model {
+class JenisSurat extends Model {
   static get tableName() {
-    return "aduans";
+    return "jenis_surats";
   }
 
   static get idColumn() {
@@ -14,12 +14,10 @@ class Aduan extends Model {
       type: "object",
       properties: {
         id: { type: "integer" },
-        judul: { type: "string" },
-        keterangan: { type: "string" },
-        foto: { type: "string" },
+        nama_jenis: { type: "string", unique: true },
       },
     };
   }
 }
 
-module.exports = Aduan;
+module.exports = JenisSurat;

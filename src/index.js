@@ -22,6 +22,8 @@ const pengajianRouter = require("./routes/pengajian.router");
 const kerjabaktiRouter = require("./routes/kerjabakti.router");
 const tahlilRouter = require("./routes/tahlil.router");
 const rapatRouter = require("./routes/rapat.router");
+const suratRouter = require("./routes/surat.router");
+const jenissuratRouter = require("./routes/jenissurat.router");
 
 const app = express();
 
@@ -54,6 +56,8 @@ app.use("/api/pengajian", pengajianRouter);
 app.use("/api/kerjabakti", kerjabaktiRouter);
 app.use("/api/tahlil", tahlilRouter);
 app.use("/api/rapat", rapatRouter);
+app.use("/api/surat", suratRouter);
+app.use("/api/jenissurat", jenissuratRouter);
 
 const PORT = process.env.SERVER_PORT || 8000;
 app.listen(PORT, () => {
