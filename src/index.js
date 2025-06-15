@@ -5,10 +5,13 @@ const express = require("express");
 const { Model } = require("objection");
 const Knex = require("knex");
 const fs = require("fs");
+const dayjs = require('dayjs');
 
 const knexConfig = require("../knexfile"); // Pastikan file ini ada
 const knex = Knex(knexConfig.development); // Gunakan environment yang sesuai
 const { verifyToken } = require("./middlewares/auth");
+const cron = require('node-cron');
+const { createMonthlyLaporan } = require('./controllers/laporan.controller');
 
 // Bind all Models to knex instance
 Model.knex(knex);
@@ -24,6 +27,9 @@ const tahlilRouter = require("./routes/tahlil.router");
 const rapatRouter = require("./routes/rapat.router");
 const suratRouter = require("./routes/surat.router");
 const jenissuratRouter = require("./routes/jenissurat.router");
+const pendudukRouter = require("./routes/penduduk.router");
+const laporanRouter = require("./routes/laporan.router");
+const laporanmanualRouter = require("./routes/laporanmanual.router");
 
 const app = express();
 
@@ -58,6 +64,31 @@ app.use("/api/tahlil", tahlilRouter);
 app.use("/api/rapat", rapatRouter);
 app.use("/api/surat", suratRouter);
 app.use("/api/jenissurat", jenissuratRouter);
+app.use("/api/penduduk", pendudukRouter);
+app.use('/api/laporan', laporanRouter);
+app.use('/api/laporanmanual', laporanmanualRouter);
+
+cron.schedule('59 23 * * *', async () => {
+  const today = dayjs();
+  const isLastDay = today.date() === today.endOf('month').date();
+
+  if (isLastDay) {
+    console.log("🔄 Akhir bulan: simpan laporan...");
+    await createMonthlyLaporan(); // Fungsi ini menyimpan ke DB
+  }
+});
+
+// // Ubah cron ke tiap menit:
+// cron.schedule('* * * * *', async () => {
+//   const today = dayjs();
+//   const isLastDay = true; // paksa true untuk testing
+
+//   if (isLastDay) {
+//     console.log("🔄 Test simpan laporan tiap menit...");
+//     await createMonthlyLaporan();
+//   }
+// });
+
 
 const PORT = process.env.SERVER_PORT || 8000;
 app.listen(PORT, () => {

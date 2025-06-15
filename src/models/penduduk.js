@@ -22,7 +22,7 @@ class Penduduk extends Model {
         jenis_kelamin: { type: "string", enum: ["Laki-laki", "Perempuan"] },
         tempat_lahir: { type: "string" },
         tanggal_lahir: { type: "string", format: "date" },
-        umur: { type: "string" },
+        umur: { type: "integer" },
         pekerjaan: { type: "string" },
         created_at: { type: "string", format: "date-time" },
         updated_at: { type: "string", format: "date-time" },
