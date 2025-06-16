@@ -23,12 +23,23 @@ const index = async (req, res) => {
  */
 const store = async (req, res, next) => {
   try {
-    const { jumlah_rumah, jumlah_meninggal, jumlah_pindah, bulan_tahun } = req.body;
+    const { jumlah_rumah, jumlah_meninggal, jumlah_pindah } = req.body;
 
-    if (!jumlah_rumah || !jumlah_meninggal || !jumlah_pindah || !bulan_tahun) {
+    if (!jumlah_rumah || !jumlah_meninggal || !jumlah_pindah) {
       return res.status(400).json({ message: 'Semua field wajib diisi' });
     }
 
+    // Ambil bulan dan tahun saat ini
+    const today = new Date();
+    const bulan_tahun = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`; // format YYYY-MM
+
+    // 🔍 Cek apakah laporan di bulan_tahun ini sudah ada
+    const existing = await LaporanManual.query().where("bulan_tahun", bulan_tahun).first();
+    if (existing) {
+      return res.status(400).json({ message: `Laporan untuk bulan ${bulan_tahun} sudah ada.` });
+    }
+
+    // 📝 Jika belum ada, simpan laporan baru
     const newLaporanManual = {
       jumlah_rumah,
       jumlah_meninggal,
@@ -47,6 +58,7 @@ const store = async (req, res, next) => {
     next(err);
   }
 };
+
 
 
 /**

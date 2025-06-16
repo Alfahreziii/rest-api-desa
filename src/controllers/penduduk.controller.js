@@ -96,9 +96,26 @@ const destroy = async (req, res) => {
   }
 };
 
+/**
+ * GET /penduduk/count
+ */
+const count = async (req, res) => {
+  try {
+    const total = await Penduduk.query().resultSize();
+    return res.json({ count: total });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Error getting penduduk count",
+      error: err.message,
+    });
+  }
+};
+
+
 module.exports = {
   index,
   store,
   update,
   destroy,
+  count,
 };
