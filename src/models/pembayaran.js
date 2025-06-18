@@ -1,4 +1,6 @@
 const { Model } = require("objection");
+const User = require("./user");
+const Iuran = require("./iuran");
 
 class Pembayaran extends Model {
   static get tableName() {
@@ -21,6 +23,27 @@ class Pembayaran extends Model {
         snap_token: { type: "string" },
         status: { type: "string" },
         paid_at: { type: "string", format: "date-time" },
+      },
+    };
+  }
+
+  static get relationMappings() {
+    return {
+      user: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: "pembayarans.user_id",
+          to: "users.id",
+        },
+      },
+      iuran: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Iuran,
+        join: {
+          from: "pembayarans.iuran_id",
+          to: "iurans.id",
+        },
       },
     };
   }

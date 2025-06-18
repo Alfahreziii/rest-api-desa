@@ -4,6 +4,39 @@ const Iuran = require("../models/iuran");
 const Pembayaran = require("../models/pembayaran");
 const User = require("../models/user"); // pastikan ada model ini
 
+/**
+ * GET /aduan
+ */
+exports.index = async (req, res) => {
+  try {
+    const pembayarans = await Pembayaran.query().withGraphFetched('[user, iuran]');
+
+    const formatted = pembayarans.map(p => ({
+      id: p.id,
+      order_id: p.order_id,
+      status: p.status,
+      paid_at: p.paid_at,
+      snap_token: p.snap_token,
+      nama_user: p.user?.name || "Tidak diketahui",
+      email_user: p.user?.email || "-",
+      bulan_iuran: p.iuran?.bulan || "-",
+      harga_iuran: p.iuran?.harga || 0,
+    }));
+
+    return res.send({
+      message: "Success",
+      data: formatted,
+    });
+  } catch (err) {
+    return res.status(500).send({
+      message: "Error retrieving Pembayaran",
+      error: err.message,
+    });
+  }
+};
+
+
+
 exports.createPayment = async (req, res) => {
   const { user_id, iuran_id } = req.body;
 
