@@ -31,6 +31,8 @@ const pendudukRouter = require("./routes/penduduk.router");
 const laporanRouter = require("./routes/laporan.router");
 const laporanmanualRouter = require("./routes/laporanmanual.router");
 const pengurusRouter = require("./routes/pengurus.router");
+const pembayaranRoutes = require("./routes/pembayaran.router");
+const iuranRoutes = require("./routes/iuran.router");
 
 const app = express();
 
@@ -69,6 +71,8 @@ app.use("/api/penduduk", pendudukRouter);
 app.use('/api/laporan', laporanRouter);
 app.use('/api/laporanmanual', laporanmanualRouter);
 app.use('/api/pengurus', pengurusRouter);
+app.use("/api/pembayaran", pembayaranRoutes);
+app.use("/api/iuran", iuranRoutes);
 
 cron.schedule('59 23 * * *', async () => {
   const today = dayjs();
