@@ -1,4 +1,5 @@
 const Tahlil = require("../models/tahlil");
+const dayjs = require('dayjs');
 
 /**
  * GET /Tahlil
@@ -6,9 +7,15 @@ const Tahlil = require("../models/tahlil");
 const index = async (req, res) => {
   try {
     const tahlils = await Tahlil.query();
+
+    const formattedtahlils = tahlils.map(tahlil => ({
+      ...tahlil,
+      created_at_formatted: dayjs(tahlil.created_at).format('DD MMMM YYYY'),
+    }));
+
     return res.send({
       message: "Success",
-      data: tahlils,
+      data: formattedtahlils,
     });
   } catch (err) {
     return res.status(500).send({

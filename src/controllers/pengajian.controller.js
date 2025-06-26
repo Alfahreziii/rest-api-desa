@@ -1,4 +1,5 @@
 const Pengajian = require("../models/pengajian");
+const dayjs = require('dayjs');
 
 /**
  * GET /Pengajian
@@ -6,9 +7,15 @@ const Pengajian = require("../models/pengajian");
 const index = async (req, res) => {
   try {
     const pengajians = await Pengajian.query();
+
+    const formattedpengajians =pengajians.map(pengajian => ({
+      ...pengajian,
+      created_at_formatted: dayjs(pengajian.created_at).format('DD MMMM YYYY'),
+    }));
+
     return res.send({
       message: "Success",
-      data: pengajians,
+      data: formattedpengajians,
     });
   } catch (err) {
     return res.status(500).send({
