@@ -3,6 +3,7 @@ const upload = require('../utils/upload');
 const path = require('path');
 const fs = require('fs');
 const { UPLOAD_DIR } = require('../utils/config');
+const dayjs = require('dayjs');
 
 /**
  * GET /Berita
@@ -11,9 +12,14 @@ const index = async (req, res) => {
   try {
     const Beritas = await Berita.query();
 
+    const formattedBeritas = Beritas.map(berita => ({
+      ...berita,
+      created_at_formatted: dayjs(berita.created_at).format('DD MMMM YYYY'),
+    }));
+
     return res.send({
       message: "Success",
-      data: Beritas,
+      data: formattedBeritas,
     });
   } catch (err) {
     return res.status(500).send({

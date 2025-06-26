@@ -4,7 +4,7 @@ const pembayaranController = require("../controllers/pembayaran.controller");
 const { verifyToken } = require("../middlewares/auth");
 
 router.get("/", verifyToken, pembayaranController.index);
-router.post("/create", verifyToken, pembayaranController.createPayment);
-router.post("/midtrans-notif", verifyToken, pembayaranController.handleNotification);
+router.post("/", verifyToken, pembayaranController.createPayment);
+router.delete('/:id', verifyToken, pembayaranController.destroy);
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const Kerjabakti = require("../models/kerjabakti");
+const dayjs = require('dayjs');
 
 /**
  * GET /Kerjabakti
@@ -6,9 +7,15 @@ const Kerjabakti = require("../models/kerjabakti");
 const index = async (req, res) => {
   try {
     const kerjabaktis = await Kerjabakti.query();
+
+        const formattedkerjabaktis = kerjabaktis.map(kerjabakti => ({
+          ...kerjabakti,
+          created_at_formatted: dayjs(kerjabakti.created_at).format('DD MMMM YYYY'),
+        }));
+
     return res.send({
       message: "Success",
-      data: kerjabaktis,
+      data: formattedkerjabaktis,
     });
   } catch (err) {
     return res.status(500).send({
@@ -23,13 +30,13 @@ const index = async (req, res) => {
  */
 const store = async (req, res, next) => {
   try {
-    const { hari, jam_mulai, jam_selesai, tempat, peserta } = req.body;
+    const { hari, judul, jam_mulai, jam_selesai, tempat, peserta } = req.body;
 
-    if (!hari || !jam_mulai || !jam_selesai || !tempat || !peserta) {
+    if (!hari || !judul || !jam_mulai || !jam_selesai || !tempat || !peserta) {
       return res.status(400).json({ message: 'Semua field wajib diisi' });
     }
 
-    const newKerjabakti = { hari, jam_mulai, jam_selesai, tempat, peserta };
+    const newKerjabakti = { hari, judul, jam_mulai, jam_selesai, tempat, peserta };
     const created = await Kerjabakti.query().insert(newKerjabakti);
 
     return res.status(201).json({
@@ -47,7 +54,7 @@ const store = async (req, res, next) => {
  */
 const update = async (req, res) => {
   const { id } = req.params;
-  const allowedFields = ["hari", "jam_mulai", "jam_selesai", "tempat", "peserta"];
+  const allowedFields = ["hari", "judul", "jam_mulai", "jam_selesai", "tempat", "peserta"];
 
   try {
     const existing = await Kerjabakti.query().findById(id);

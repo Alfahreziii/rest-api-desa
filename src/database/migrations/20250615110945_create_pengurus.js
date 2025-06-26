@@ -7,7 +7,8 @@ exports.up = async function (knex) {
     table.increments("id").primary();
     table.string("nama").notNullable();
     table.string("email").unique().notNullable();
-    table.string("jabatan").notNullable();
+    table.integer('jabatan').unsigned()
+    table.foreign('jabatan').references('id').inTable('pengurus_jabatan').onDelete('CASCADE');
     table.string("alamat").notNullable();
     table.string("no_hp").notNullable();
     table.string("foto").notNullable();

@@ -15,6 +15,7 @@ class Kerjabakti extends Model {
       properties: {
         id: { type: "integer" },
         hari: { type: "string" },
+        judul: { type: "string" },
         jam_mulai: {
           type: "string",
           pattern: "^([01]\\d|2[0-3]):([0-5]\\d)$"

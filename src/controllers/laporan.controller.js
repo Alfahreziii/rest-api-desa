@@ -61,7 +61,7 @@ exports.createMonthlyLaporan = async (req, res) => {
     const jumlahLaki = semuaPenduduk.filter(p => p.jenis_kelamin === 'Laki-laki').length;
     const jumlahPerempuan = semuaPenduduk.filter(p => p.jenis_kelamin === 'Perempuan').length;
     const jumlahLahir = semuaPenduduk.filter(p =>
-      dayjs(p.tgl_lahir).isSame(tanggal_laporan, 'day')
+      dayjs(p.tgl_lahir).isSame(tanggal_laporan, 'month')
     ).length;
 
     // Cek apakah laporan bulan ini sudah ada

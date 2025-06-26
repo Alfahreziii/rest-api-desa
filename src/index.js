@@ -33,6 +33,7 @@ const laporanmanualRouter = require("./routes/laporanmanual.router");
 const pengurusRouter = require("./routes/pengurus.router");
 const pembayaranRoutes = require("./routes/pembayaran.router");
 const iuranRoutes = require("./routes/iuran.router");
+const jabatanRoutes = require("./routes/jabatan.router");
 
 const app = express();
 
@@ -73,16 +74,22 @@ app.use('/api/laporanmanual', laporanmanualRouter);
 app.use('/api/pengurus', pengurusRouter);
 app.use("/api/pembayaran", pembayaranRoutes);
 app.use("/api/iuran", iuranRoutes);
+app.use("/api/jabatan", jabatanRoutes);
 
 cron.schedule('59 23 * * *', async () => {
+  console.log(`[Cron] Cek akhir bulan: ${dayjs().format('YYYY-MM-DD HH:mm')}`);
+  
   const today = dayjs();
   const isLastDay = today.date() === today.endOf('month').date();
 
   if (isLastDay) {
     console.log("🔄 Akhir bulan: simpan laporan...");
-    await createMonthlyLaporan(); // Fungsi ini menyimpan ke DB
+    await createMonthlyLaporan();
+  } else {
+    console.log("⏭️ Bukan akhir bulan, lewati.");
   }
 });
+
 
 // // Ubah cron ke tiap menit:
 // cron.schedule('* * * * *', async () => {

@@ -7,9 +7,8 @@ exports.up = async function (knex) {
     table.increments("id").primary();
     table.integer("user_id").unsigned().notNullable(); // Foreign Key ke tabel users
     table.integer("iuran_id").unsigned().notNullable(); // Foreign Key ke tabel iurans
-    table.string("order_id").notNullable(); // ID unik dari Midtrans
-    table.string("snap_token").notNullable(); // Token dari Snap Midtrans
-    table.string("status").notNullable().defaultTo("pending"); // pending, settlement, cancel, etc
+    table.string("order_id").notNullable();
+    table.string("status").notNullable();
     table.timestamp("paid_at").nullable(); // diisi jika statusnya settlement
     table.timestamps(true, true); // created_at & updated_at
 

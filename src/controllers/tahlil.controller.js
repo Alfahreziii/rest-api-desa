@@ -23,13 +23,13 @@ const index = async (req, res) => {
  */
 const store = async (req, res, next) => {
   try {
-    const { hari, jam_mulai, jam_selesai, tempat, ustadzah } = req.body;
+    const { hari, judul, jam_mulai, jam_selesai, tempat, ustadzah } = req.body;
 
-    if (!hari || !jam_mulai || !jam_selesai || !tempat || !ustadzah) {
+    if (!hari || !judul || !jam_mulai || !jam_selesai || !tempat || !ustadzah) {
       return res.status(400).json({ message: 'Semua field wajib diisi' });
     }
 
-    const newTahlil = { hari, jam_mulai, jam_selesai, tempat, ustadzah };
+    const newTahlil = { hari, judul, jam_mulai, jam_selesai, tempat, ustadzah };
     const created = await Tahlil.query().insert(newTahlil);
 
     return res.status(201).json({
@@ -47,7 +47,7 @@ const store = async (req, res, next) => {
  */
 const update = async (req, res) => {
   const { id } = req.params;
-  const allowedFields = ["hari", "jam_mulai", "jam_selesai", "tempat", "ustadzah"];
+  const allowedFields = ["hari", "judul", "jam_mulai", "jam_selesai", "tempat", "ustadzah"];
 
   try {
     const existing = await Tahlil.query().findById(id);

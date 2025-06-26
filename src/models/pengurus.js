@@ -16,10 +16,26 @@ class Pengurus extends Model {
         id: { type: "integer" },
         nama: { type: "string" },
         email: { type: "string", format: "email" },
-        jabatan: { type: "string" },
+        jabatan: { type: "integer" },
         alamat: { type: "string" },
         no_hp: { type: "string" },
         foto: { type: "string" },
+      },
+    };
+  }
+
+    // Relasi ke jabatan
+  static get relationMappings() {
+    const Jabatan = require("./jabatan.js"); // Path ke model jabatan
+
+    return {
+      jabatan_rel: {
+        relation: Model.BelongsToOneRelation, // Relasi 1 ke 1 (belongsTo)
+        modelClass: Jabatan, // Model jabatan
+        join: {
+          from: "pengurus.jabatan", // Tabel asal
+          to: "pengurus_jabatan.id", // Tabel tujuan
+        },
       },
     };
   }

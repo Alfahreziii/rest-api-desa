@@ -1,4 +1,5 @@
 const Rapat = require("../models/rapat");
+const dayjs = require('dayjs');
 
 /**
  * GET /rapat
@@ -6,9 +7,14 @@ const Rapat = require("../models/rapat");
 const index = async (req, res) => {
   try {
     const rapats = await Rapat.query();
+
+    const formattedRapats = rapats.map(rapat => ({
+      ...rapat,
+      created_at_formatted: dayjs(rapat.created_at).format('DD MMMM YYYY'),
+    }));
     return res.send({
       message: "Success",
-      data: rapats,
+      data: formattedRapats,
     });
   } catch (err) {
     return res.status(500).send({
@@ -23,13 +29,13 @@ const index = async (req, res) => {
  */
 const store = async (req, res, next) => {
   try {
-    const { hari, jam_mulai, jam_selesai, tempat, peserta, bahasan } = req.body;
+    const { judul, hari, jam_mulai, jam_selesai, tempat, peserta, bahasan } = req.body;
 
-    if (!hari || !jam_mulai || !jam_selesai || !tempat || !peserta || !bahasan) {
+    if (!judul || !hari || !jam_mulai || !jam_selesai || !tempat || !peserta || !bahasan) {
       return res.status(400).json({ message: 'Semua field wajib diisi' });
     }
 
-    const newRapat = { hari, jam_mulai, jam_selesai, tempat, peserta, bahasan };
+    const newRapat = { judul, hari, jam_mulai, jam_selesai, tempat, peserta, bahasan };
     const created = await Rapat.query().insert(newRapat);
 
     return res.status(201).json({
@@ -47,7 +53,7 @@ const store = async (req, res, next) => {
  */
 const update = async (req, res) => {
   const { id } = req.params;
-  const allowedFields = ["hari", "jam_mulai", "jam_selesai", "tempat", "peserta", "bahasan"];
+  const allowedFields = ["judul", "hari", "jam_mulai", "jam_selesai", "tempat", "peserta", "bahasan"];
 
   try {
     const existing = await Rapat.query().findById(id);

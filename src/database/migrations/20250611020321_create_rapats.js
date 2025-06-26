@@ -5,6 +5,7 @@
 exports.up = async function (knex) {
   await knex.schema.createTable("rapats", (table) => {
     table.increments("id").primary();
+    table.string("judul").notNullable();
     table.string("hari").notNullable();
     table.time("jam_mulai").notNullable();
     table.time("jam_selesai").notNullable();

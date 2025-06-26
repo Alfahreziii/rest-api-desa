@@ -9,19 +9,29 @@ const { UPLOAD_DIR } = require('../utils/config');
  */
 const index = async (req, res) => {
   try {
-    const Penguruss = await Pengurus.query();
+    const pengurus = await Pengurus.query()
+      .withGraphFetched("jabatan_rel")
+      .modifyGraph("jabatan_rel", builder => {
+        builder.select("nama_jabatan");
+      });
+
+    const response = pengurus.map(penguruss => ({
+      ...penguruss,
+      jabatan: penguruss.jabatan_rel?.nama_jabatan || null,
+    }));
 
     return res.send({
       message: "Success",
-      data: Penguruss,
+      data: response,
     });
   } catch (err) {
     return res.status(500).send({
-      message: "Error retrieving Pengurus",
+      message: "Error retrieving pengurus",
       error: err.message,
     });
   }
 };
+
 
 /**
  * POST /pengurus
@@ -36,7 +46,7 @@ const store = async (req, res, next) => {
 
     const newPengurus = {
       nama,
-      jabatan,
+      jabatan: parseInt(jabatan, 10),
       email,
       alamat,
       no_hp,
@@ -91,9 +101,10 @@ const update = async (req, res) => {
 
     allowedFields.forEach(field => {
       if (req.body[field] !== undefined) {
-        updateData[field] = req.body[field];
+        updateData[field] = field === 'jabatan' ? parseInt(req.body[field], 10) : req.body[field];
       }
     });
+
 
     if (req.file) {
       const allowedTypes = ['.png', '.jpg', '.jpeg', '.gif'];
