@@ -1,5 +1,5 @@
 const Iuran = require("../models/iuran");
-
+const Pembayaran = require('../models/pembayaran');
 /**
  * GET /iuran
  */
@@ -17,6 +17,42 @@ const index = async (req, res) => {
     });
   }
 };
+
+const getIuranWithStatus = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Ambil semua iuran
+    const iuranList = await Iuran.query();
+
+    // Ambil semua pembayaran user yang statusnya Lunas
+    const pembayaranLunas = await Pembayaran.query()
+      .where('user_id', userId)
+      .where('status', 'Lunas');
+
+    // Buat set berisi iuran_id yang sudah dibayar lunas
+    const iuranLunasSet = new Set(pembayaranLunas.map(p => p.iuran_id));
+
+    // Gabungkan data
+    const result = iuranList.map(iuran => ({
+      id: iuran.id,
+      bulan: iuran.bulan,
+      harga: iuran.harga,
+      status: iuranLunasSet.has(iuran.id) ? 'lunas' : 'belum dibayar',
+    }));
+
+    return res.send({
+      message: 'Success',
+      data: result,
+    });
+  } catch (err) {
+    return res.status(500).send({
+      message: 'Gagal mengambil data iuran',
+      error: err.message,
+    });
+  }
+};
+
 
 /**
  * POST /Iuran
@@ -101,4 +137,5 @@ module.exports = {
   store,
   update,
   destroy,
+  getIuranWithStatus,
 };

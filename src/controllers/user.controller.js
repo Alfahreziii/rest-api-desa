@@ -82,16 +82,30 @@ const update = async (req, res) => {
       }
     });
 
-    // Cek user lama
     const user = await User.query().findById(id);
     if (!user) return res.status(404).send({ message: "User not found" });
 
-    // Jika password diberikan
+    // Validasi password lama jika email atau password berubah
+    const isSensitiveUpdate = (updateData.email && updateData.email !== user.email) || updateData.password;
+
+    if (isSensitiveUpdate) {
+      const oldPassword = req.body.old_password;
+      if (!oldPassword) {
+        return res.status(400).send({ message: "Password lama wajib diisi untuk melakukan perubahan sensitif." });
+      }
+
+      const passwordValid = await bcrypt.compare(oldPassword, user.password);
+      if (!passwordValid) {
+        return res.status(403).send({ message: "Password lama salah." });
+      }
+    }
+
+    // Handle hash password baru jika diubah
     if (updateData.password) {
       updateData.password = await bcrypt.hash(updateData.password, 10);
     }
 
-    // Jika email diubah
+    // Jika email diubah, kirim email verifikasi
     if (updateData.email && updateData.email !== user.email) {
       const existingUser = await User.query()
         .where('email', updateData.email)
@@ -104,14 +118,12 @@ const update = async (req, res) => {
           message: "Email sudah digunakan oleh pengguna lain.",
         });
       }
+
       const token = uuidv4();
       updateData.unverified_email = updateData.email;
       updateData.email_verification_token = token;
-
-      // Jangan langsung ubah email lama
       delete updateData.email;
 
-      // Kirim email verifikasi
       const verificationLink = `${process.env.BASE_URL}/api/auth/verify-email?token=${token}`;
       const htmlContent = `
         <h3>Verifikasi Email</h3>
@@ -120,16 +132,16 @@ const update = async (req, res) => {
       `;
       await sendEmail(updateData.unverified_email, "Verifikasi Email - Movie App", htmlContent);
 
-      // Tambahkan response untuk memberi tahu user
       await User.query().findById(id).patch(updateData);
       return res.send({
         message: "Link verifikasi telah dikirim ke email baru. Verifikasi untuk mengaktifkan.",
       });
     }
 
-    // Update data biasa
+    // Patch data biasa
     await User.query().findById(id).patch(updateData);
     return res.send({ message: "User updated successfully" });
+
   } catch (err) {
     return res.status(500).send({
       message: "Error updating user",
@@ -137,6 +149,7 @@ const update = async (req, res) => {
     });
   }
 };
+
 
 
 /**

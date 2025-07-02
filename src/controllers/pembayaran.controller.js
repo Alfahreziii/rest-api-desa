@@ -35,6 +35,41 @@ exports.index = async (req, res) => {
   }
 };
 
+exports.getMyPayments = async (req, res) => {
+  const userId = req.user.id; // dari token
+
+  try {
+    const pembayarans = await Pembayaran.query()
+      .where('user_id', userId)
+      .withGraphFetched('[user, iuran]')
+      .orderBy('paid_at', 'desc');
+
+    const formatted = pembayarans.map(p => ({
+      id: p.id,
+      order_id: p.order_id,
+      status: p.status,
+      paid_at: p.paid_at,
+      nama_user: p.user?.name || "Tidak diketahui",
+      user_id: p.user?.id || "Tidak diketahui",
+      email_user: p.user?.email || "-",
+      bulan_iuran: p.iuran?.bulan || "-",
+      iuran_id: p.iuran?.id || "-",
+      harga_iuran: p.iuran?.harga || 0,
+    }));
+
+    return res.json({
+      message: "Success",
+      data: formatted,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Gagal mengambil data pembayaran Anda",
+      error: err.message,
+    });
+  }
+};
+
+
 
 
 exports.createPayment = async (req, res) => {

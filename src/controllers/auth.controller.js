@@ -53,7 +53,7 @@ const register = async (req, res, next) => {
       alamat_ktp,
       role,
       email_verified_at: null,
-      remember_token: verificationToken, // simpan token verifikasi di sini
+      email_verification_token: verificationToken, // simpan token verifikasi di sini
     };
 
     const createdUser = await UserModel.query().insert(newUser);
@@ -144,10 +144,15 @@ const login = async (req, res, next) => {
       });
     }
 
-    const token = jwt.sign(
-      { id: user.id, name: user.name, email: user.email },
-      process.env.JWT_SECRET
-    );
+    const token = jwt.sign({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role // ← ini penting
+    }, process.env.JWT_SECRET, {
+      expiresIn: '1d'
+    });
+
 
     return res.send({
       message: "Login berhasil",
