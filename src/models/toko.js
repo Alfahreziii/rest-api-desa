@@ -42,4 +42,5 @@ class Toko extends Model {
   }
 }
 
+
 module.exports = Toko;

@@ -106,8 +106,12 @@ const update = async (req, res) => {
           fs.unlinkSync(uploadedPath);
         }
       }
-
       return res.status(404).json({ message: "Toko tidak ditemukan" });
+    }
+
+    // ✅ Cek apakah toko milik user yang sedang login
+    if (toko.id_user !== req.user.id) {
+      return res.status(403).json({ message: "Anda tidak memiliki izin untuk mengubah toko ini" });
     }
 
     const updateData = {};
@@ -154,6 +158,7 @@ const update = async (req, res) => {
     });
   }
 };
+
 
 /**
  * DELETE /tokos/:id

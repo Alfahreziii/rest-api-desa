@@ -36,6 +36,7 @@ const iuranRoutes = require("./routes/iuran.router");
 const jabatanRoutes = require("./routes/jabatan.router");
 const geografisRoutes = require("./routes/geografis.router");
 const tokoRoutes = require("./routes/toko.router");
+const productRoutes = require("./routes/product.router");
 
 const app = express();
 
@@ -79,6 +80,7 @@ app.use("/api/iuran", iuranRoutes);
 app.use("/api/jabatan", jabatanRoutes);
 app.use("/api/geografis", geografisRoutes);
 app.use("/api/toko", tokoRoutes);
+app.use("/api/product", productRoutes);
 
 cron.schedule('59 23 * * *', async () => {
   console.log(`[Cron] Cek akhir bulan: ${dayjs().format('YYYY-MM-DD HH:mm')}`);
