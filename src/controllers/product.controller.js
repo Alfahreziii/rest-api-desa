@@ -6,10 +6,15 @@ const { UPLOAD_DIR } = require('../utils/config');
 
 const index = async (req, res) => {
   try {
-    const products = await Product.query().withGraphFetched("toko");
+    const products = await Product.query()
+      .joinRelated('toko') // join ke tabel toko
+      .where('toko.status', 'aktif') // hanya toko dengan status aktif
+      .select('products.*') // pilih semua kolom dari product
+      .withGraphFetched("toko");
 
     const formatted = products.map((p) => ({
       id: p.id,
+      id_toko: p.id_toko,
       nama_produk: p.nama_produk,
       deskripsi: p.deskripsi,
       harga: p.harga,
@@ -23,6 +28,7 @@ const index = async (req, res) => {
     res.status(500).json({ message: "Gagal mengambil produk", error: err.message });
   }
 };
+
 
 const getMyProducts = async (req, res) => {
   try {
@@ -147,9 +153,14 @@ const update = async (req, res) => {
     const updateData = {};
     allowedFields.forEach(field => {
       if (req.body[field] !== undefined) {
-        updateData[field] = req.body[field];
+        if (field === "harga" || field === "stok") {
+          updateData[field] = parseInt(req.body[field], 10);
+        } else {
+          updateData[field] = req.body[field];
+        }
       }
     });
+
 
     // 5. Cek dan ganti foto jika ada
     if (req.file) {

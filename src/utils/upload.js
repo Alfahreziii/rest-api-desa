@@ -29,9 +29,13 @@ const fileFilter = function (req, file, cb) {
   if (extname && mimetype) {
     cb(null, true);
   } else {
-    cb(new Error('File harus berupa gambar (jpeg, jpg, png, gif)'));
+    const err = new Error("File harus berupa gambar (jpeg, jpg, png, gif)");
+    err.statusCode = 400;
+    err.isFileValidationError = true; // custom flag
+    cb(err);
   }
 };
+
 
 const upload = multer({
   storage: storage,

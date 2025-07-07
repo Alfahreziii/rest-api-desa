@@ -1,9 +1,13 @@
 const baseCors = require("cors");
+require("dotenv").config();
 
-const whitelistOrigins = ["http://localhost:5173"];
+const whitelistOrigins = [
+  process.env.CLIENT_URL || "http://localhost:5175"
+];
+
 const cors = baseCors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like direct link from browser/email)
+    // Allow requests with no origin (misal: curl, postman, atau email link)
     if (!origin || whitelistOrigins.includes(origin)) {
       return callback(null, true);
     }
@@ -11,6 +15,5 @@ const cors = baseCors({
   },
   credentials: true,
 });
-
 
 module.exports = { cors };

@@ -37,6 +37,7 @@ const jabatanRoutes = require("./routes/jabatan.router");
 const geografisRoutes = require("./routes/geografis.router");
 const tokoRoutes = require("./routes/toko.router");
 const productRoutes = require("./routes/product.router");
+const cpiuranRoutes = require("./routes/cpiuran.router");
 
 const app = express();
 
@@ -81,6 +82,7 @@ app.use("/api/jabatan", jabatanRoutes);
 app.use("/api/geografis", geografisRoutes);
 app.use("/api/toko", tokoRoutes);
 app.use("/api/product", productRoutes);
+app.use("/api/cpiuran", cpiuranRoutes);
 
 cron.schedule('59 23 * * *', async () => {
   console.log(`[Cron] Cek akhir bulan: ${dayjs().format('YYYY-MM-DD HH:mm')}`);
@@ -107,6 +109,20 @@ cron.schedule('59 23 * * *', async () => {
 //     await createMonthlyLaporan();
 //   }
 // });
+app.use((err, req, res, next) => {
+  // Tangani error dari multer (termasuk fileFilter)
+  if (err.isFileValidationError) {
+    return res.status(err.statusCode || 400).json({
+      message: err.message || "Terjadi kesalahan validasi file.",
+    });
+  }
+
+  // Error lainnya
+  return res.status(err.statusCode || 500).json({
+    message: err.message || "Terjadi kesalahan di server.",
+  });
+});
+
 
 
 const PORT = process.env.SERVER_PORT || 8000;
