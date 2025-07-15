@@ -17,6 +17,7 @@ const index = async (req, res) => {
     id: toko.id,
     id_user: toko.id_user,
     nama_toko: toko.nama_toko,
+    jenis_usaha: toko.jenis_usaha,
     alamat: toko.alamat,
     foto: toko.foto,
     foto_ktp: toko.foto_ktp,
@@ -47,16 +48,17 @@ const index = async (req, res) => {
  */
 const store = async (req, res) => {
   try {
-    const { nama_toko, no_hp, alamat } = req.body;
+    const { nama_toko, no_hp, alamat, jenis_usaha } = req.body;
     const userId = req.user.id;
 
-    if ( !nama_toko || !no_hp || !req.files?.foto || !req.files?.foto_ktp || !alamat) {
+    if ( !nama_toko || !no_hp || !jenis_usaha || !req.files?.foto || !req.files?.foto_ktp || !alamat) {
       return res.status(400).json({ message: ' nama_toko, no_hp, alamat dan foto wajib diisi' });
     }
 
     const newToko = {
     id_user: userId,
     nama_toko,
+    jenis_usaha,
     no_hp,
     alamat,
     foto: req.files.foto[0].filename,
@@ -95,7 +97,7 @@ const store = async (req, res) => {
  */
 const update = async (req, res) => {
   const { id } = req.params;
-  const allowedFields = ["nama_toko", "no_hp", "alamat"];
+  const allowedFields = ["nama_toko", "no_hp", "alamat", "jenis_usaha"];
 
   try {
     const toko = await Toko.query().findById(id);
@@ -225,6 +227,7 @@ const me = async (req, res) => {
       alamat: toko.alamat,
       foto: toko.foto,
       foto_ktp: toko.foto_ktp,
+      jenis_usaha: toko.jenis_usaha,
       no_hp: toko.no_hp,
       status: toko.status,
       created_at: toko.created_at,

@@ -20,6 +20,7 @@ class Toko extends Model {
         id_user: { type: 'integer' },
         nama_toko: { type: 'string', minLength: 1, maxLength: 255 },
         alamat: { type: 'string', minLength: 1, maxLength: 255 },
+        jenis_usaha: { type: 'string', minLength: 1, maxLength: 255 },
         foto: { type: 'string', minLength: 1, maxLength: 255 },
         foto_ktp: { type: ['string', 'null'] },
         no_hp: { type: 'string', minLength: 1, maxLength: 20 },

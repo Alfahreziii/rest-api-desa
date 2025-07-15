@@ -36,10 +36,12 @@ const register = async (req, res, next) => {
       alamat_rt005 = null,
       alamat_ktp = null,
       role = "user",
+      agama = null,
     } = req.body;
 
     const newUser = {
       name,
+      agama,
       email,
       password: passwordHash,
       nomor_kk,

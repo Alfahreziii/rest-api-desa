@@ -71,6 +71,7 @@ const update = async (req, res) => {
     "alamat_rt005",
     "alamat_ktp",
     "role",
+    "agama",
     "remember_token"
   ];
 
